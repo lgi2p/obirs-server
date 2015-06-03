@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OBIRS API</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <h1>OBIRS API</h1>
+
+        This short documentation presents how to use the Ontology-Based Information Retrieval System API. 
+        Note that in the given URL provided URL must be encoded, please refer to <a href="http://www.w3schools.com/tags/ref_urlencode.asp">W3C URL encoder</a> to encode your own example.
+
+        <h2>1) Autocomplete: searching concept URIs considering a given label prefix</h2>
+
+        <p>
+            The API provides you a way to search for concept URIs considering a given prefix string. 
+            The concept URIs that are considered are those specified into the given concept index. 
+            Therefore, this function can be used to implement an autocomplete feature for query definition.
+        </p>
+
+        URL: <b>/api/search</b> <br/>
+        Parameter: term - value a given string <br/>
+        <br/>
+        Query example:
+        <code>
+            <a href="api/search?term=to">api/search?term=to</a>
+        </code>
+
+        <br/>
+        <br/>
+        Result example <br/>
+        <pre>
+    <code>
+      {"results":[
+            {"label":"toxicology","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Toxicologie"},
+            {"label":"toxicogenomics","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Toxicogenomique"},
+            {"label":"tocotrienol","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Tocotrienol"},
+            {"label":"tocopherol","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Tocopherol"},
+            {"label":"toxicity","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Toxicite"},
+            {"label":"topological study","uri":"http:\/\/www.cea.fr\/ontotoxnuc#EtudeTopologique"},
+            {"label":"tomography","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Tomographie"},
+            {"label":"tool","uri":"http:\/\/www.cea.fr\/ontotoxnuc#Outil"},
+            {"label":"toxic metal","uri":"http:\/\/www.cea.fr\/ontotoxnuc#MetalToxique"}
+       ]}
+    </code>
+        </pre>
+
+        <h2>2) Query: searching items annotated by concepts considering a set of weighted concepts</h2>
+
+        <p>
+            The API provides you a way to search for items considering a set of weighted concepts. 
+            Each concept of the query is characterized by an URI (which corresponds to the URI of the concept into the item annotations and the ontology), as well as a weigh.
+            The sum of the weights are expected to be 1; if this is not the case weights will be normalized. 
+            The expected JSON syntaxes for both the query and the results are presented below. 
+            Note that the default OBIRS configuration will be used to find the results - please refer to OBIRS implementation for more details.
+        </p>
+
+        URL: <b>/api/search</b> <br/>
+        Parameter: query - a JSON query respecting the format specified below <br/>
+        Example: /api/search?query=[ENCODED_JSON_QUERY] <br/>
+        <br/>
+        Query value example:
+        <pre>
+        <code>
+            {"concepts":[
+                {"uri":"http://www.cea.fr/ontotoxnuc#AnalyseStatistique", "weight": 0.5},
+                {"uri":"http://www.cea.fr/ontotoxnuc#Uranium", "weight":0.5}
+                ]
+            }
+        </code>
+        </pre>
+        <p>
+            concepts defines the set of concepts of the query. 
+            For each concept the query defines the URI identifying the concept into the ontology and its weight (importance in for the query). 
+            Weights are normalized.
+        </p>
+        
+        Query example: <a href="api/search?query=%7B%22concepts%22%3A%5B%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23AnalyseStatistique%22%2C%22weight%22%3A0.5%7D%2C%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23Uranium%22%2C%22weight%22%3A0.5%7D%5D%7D">api/search?query=%7B%22concepts%22%3A%5B%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23AnalyseStatistique%22%2C%22weight%22%3A0.5%7D%2C%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23Uranium%22%2C%22weight%22%3A0.5%7D%5D%7D</a>
+
+        <br/>
+        <br/>
+        Result example <br/>
+        <pre>
+    <code>
+      {"results":[
+        {"itemTitle":"f835.json","score":1.0,"itemId":"919","itemURI":"ns0:919",
+            "concepts":[
+                {"relationType":"ns2:EXACT","score":1.0,"queryConceptURI":"ns1:AnalyseStatistique","matchingConceptURI":"ns1:AnalyseStatistique"},
+                {"relationType":"ns2:EXACT","score":1.0,"queryConceptURI":"ns1:Uranium","matchingConceptURI":"ns1:Uranium"}
+            ],
+            "href":"\/data\/toxnuc\/toxnuc_annots_5_11_14\/annots\/f835.json"},
+        {"itemTitle":"f771.json","score":1.0,"itemId":"1252","itemURI":"ns0:1252",
+            "concepts":[
+                {"relationType":"ns2:EXACT","score":1.0,"queryConceptURI":"ns1:AnalyseStatistique","matchingConceptURI":"ns1:AnalyseStatistique"},
+                {"relationType":"ns2:EXACT","score":1.0,"queryConceptURI":"ns1:Uranium","matchingConceptURI":"ns1:Uranium"}
+             ],
+             "href":"\/data\/toxnuc\/toxnuc_annots_5_11_14\/annots\/f771.json"},
+        ...],
+        "infoConcepts":[
+            {"label":"statistical analysis","uri":"ns1:AnalyseStatistique"},
+            {"label":"bioinformatics analysis","uri":"ns1:AnalyseBioinformatique"},
+            {"label":"actinide","uri":"ns1:Actinide"},{"label":"uranium","uri":"ns1:Uranium"},
+            {"label":"plutonium","uri":"ns1:Plutonium"},{"label":"data analysis","uri":"ns1:AnalyseDeDonnees"}
+        ],
+        "prefixes":[
+            {"ns":"http:\/\/www.cea.fr\/ontotoxnuc#","prefix":"ns1"},
+            {"ns":"http:\/\/www.mines-ales.fr\/obirs\/match_type\/","prefix":"ns2"},
+            {"ns":"http:\/\/www.mines-ales.fr\/obirs\/items\/","prefix":"ns0"}
+        ]
+       }
+    </code>
+        </pre>
+
+        The results are defined using three parts: 
+        <ul>
+            <li>"results": an array of results with associated information. 
+                The "concepts" field, if filled (depends on the measure configuration), specifies the concepts of the query that justify the score that has been obtained, e.g. by given the query concept, the association with a concept of the ontology, as well as the semantics of this association.
+            </li>
+            <li>
+                "infoConcepts": an array of pairs uri/label that gives the labels associated to each concept used in the "results" field.
+            </li>
+            <li>
+                "prefixes": an array of pairs ns/prefix that gives the full namespace (ns) associated to each prefix used in the fields "results" and "infoConcepts".
+                These prefix values can be used to build the full URI of the concepts.
+            </li>
+        </ul>
+        
+        
+        <h2>3) Refine: build a new query considering evaluations a existing results</h2>
+
+        <p>
+            The API provides you a way to improve a query considering some evaluations of existing results.
+            The query specifies selected and rejected items in the first set of results as well as a classical query (set of concepts with associated URIs).
+        </p>
+
+        URL: <b>/api/refine</b> <br/>
+        Parameter: query - a JSON query respecting the format specified below <br/>
+        Example: /api/refine?query=[ENCODED_JSON_QUERY] <br/>
+        <br/>
+        Query value example:
+        <pre>
+        <code>
+            {
+                "selectedItemURIs":["http://www.mines-ales.fr/obirs/items/1132","http://www.mines-ales.fr/obirs/items/1133"],
+                "rejectedItemURIs":["http://www.mines-ales.fr/obirs/items/1131"],
+                "query": {
+                        "concepts": [
+                                {"uri": "http://www.cea.fr/ontotoxnuc#AnalyseStatistique", "weight": 0.5},
+                                {"uri":"http://www.cea.fr/ontotoxnuc#Uranium", "weight": 0.5}
+                                ]
+                }
+            }
+        </code>
+        </pre>
+        
+        Query example: <a href="api/refine?query=%7B%20%09%22selectedItemURIs%22%3A%5B%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1132%22%2C%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1133%22%5D%2C%20%09%22rejectedItemURIs%22%3A%5B%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1131%22%5D%2C%20%09%22query%22%3A%20%7B%20%09%09%22concepts%22%3A%20%5B%20%09%09%09%7B%22uri%22%3A%20%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23AnalyseStatistique%22%2C%20%22weight%22%3A%200.5%7D%2C%20%09%09%09%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23Uranium%22%2C%20%22weight%22%3A%200.5%7D%20%09%09%09%5D%20%09%7D%20%7D">api/refine?query=%7B%20%09%22selectedItemURIs%22%3A%5B%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1132%22%2C%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1133%22%5D%2C%20%09%22rejectedItemURIs%22%3A%5B%22http%3A%2F%2Fwww.mines-ales.fr%2Fobirs%2Fitems%2F1131%22%5D%2C%20%09%22query%22%3A%20%7B%20%09%09%22concepts%22%3A%20%5B%20%09%09%09%7B%22uri%22%3A%20%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23AnalyseStatistique%22%2C%20%22weight%22%3A%200.5%7D%2C%20%09%09%09%7B%22uri%22%3A%22http%3A%2F%2Fwww.cea.fr%2Fontotoxnuc%23Uranium%22%2C%20%22weight%22%3A%200.5%7D%20%09%09%09%5D%20%09%7D%20%7D</a>
+
+        <br/>
+        <br/>
+        Result example <br/>
+        <pre>
+    <code>
+      {
+        "aggregator":MAX,
+        "numberOfResults":30,
+        "similarityMeasure":LIN,
+        "concepts":[
+                { "weight":1.0, "uri":"http:\/\/www.cea.fr\/ontotoxnuc#InVitro"}
+        ],
+        "scoreThreshold":0.0,
+        "aggregatorParameter":2.0
+      }
+    </code>
+        </pre>
+
+    </body>
+</html>
